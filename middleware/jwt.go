@@ -14,6 +14,7 @@ var key = os.Getenv("JWT_SECRET")
 
 type Service interface {
 	GenerateToken(userID int, role string) (string, error)
+	GenerateRefreshToken(userID int, role string) (string, error)
 	ValidateToken(encodedToken string) (*jwt.Token, error)
 }
 
@@ -26,6 +27,26 @@ func NewService() *jwtService {
 
 func (s *jwtService) GenerateToken(userID int, role string) (string, error) {
 	expirationTime := time.Now().Add(1 * time.Hour).Unix()
+
+	claims := jwt.MapClaims{
+		"user_id": userID,
+		"role":    role,
+		"exp":     expirationTime,
+	}
+	log.Println(claims)
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	signedToken, err := token.SignedString([]byte(key))
+	if err != nil {
+		return signedToken, err
+	}
+
+	return signedToken, nil
+}
+
+func (s *jwtService) GenerateRefreshToken(userID int, role string) (string, error) {
+	expirationTime := time.Now().Add(7 * 24 * time.Hour).Unix()
 
 	claims := jwt.MapClaims{
 		"user_id": userID,
