@@ -1,8 +1,6 @@
 package main
 
 import (
-	"mini-commerce/config"
-	"mini-commerce/migration"
 	"mini-commerce/routes"
 
 	"github.com/gin-gonic/gin"
@@ -11,13 +9,13 @@ import (
 func main() {
 	r := gin.Default()
 
-	db := config.Connection()
+	// db := config.Connection()
 
 	// db.AutoMigrate(&migration.User{})
 	// db.AutoMigrate(&migration.Product{})
 	// db.AutoMigrate(&migration.Cart{})
 	// db.AutoMigrate(&migration.Address{})
-	db.AutoMigrate(&migration.Transaction{})
+	// db.AutoMigrate(&migration.Transaction{})
 
 	// db.Migrator().DropTable(&migration.User{})
 	// db.Migrator().DropTable(&migration.Product{})
