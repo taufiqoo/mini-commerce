@@ -1,10 +1,15 @@
 package handler
 
 import (
+	"context"
+	"encoding/json"
+	"mini-commerce/config"
 	"mini-commerce/entity"
 	"mini-commerce/helper"
 	"mini-commerce/layer/transaction"
 	"strconv"
+
+	amqp "github.com/rabbitmq/amqp091-go"
 
 	"github.com/gin-gonic/gin"
 )
@@ -81,8 +86,8 @@ func (h *transactionHandler) CreateTransactionHandler(c *gin.Context) {
 
 	newTransaction, err := h.service.SaveNewTransaction(userIDInt, input)
 	if err != nil {
-		responseErr := helper.APIFailure(500, "internal server error", err.Error())
-		c.JSON(500, responseErr)
+		responseErr := helper.APIFailure(404, "not found", err.Error())
+		c.JSON(404, responseErr)
 		return
 	}
 
@@ -90,7 +95,75 @@ func (h *transactionHandler) CreateTransactionHandler(c *gin.Context) {
 	c.JSON(201, response)
 }
 
-// BUAT ADMIN
+func (h *transactionHandler) PaymentTransactionHandler(c *gin.Context) {
+	transactionID, _ := strconv.Atoi(c.Param("transactionId"))
+
+	var paymentInput entity.PaymentInput
+	if err := c.ShouldBindJSON(&paymentInput); err != nil {
+		responseErr := helper.APIFailure(400, "Bad request", "Invalid request body")
+		c.JSON(400, responseErr)
+		return
+	}
+
+	transactionDetails, err := h.service.GetTransactionDetail(transactionID)
+	if err != nil {
+		responseErr := helper.APIFailure(404, "Not found", err.Error())
+		c.JSON(404, responseErr)
+		return
+	}
+
+	if paymentInput.Nominal != float64(transactionDetails.TotalPrice) {
+		responseErr := helper.APIFailure(400, "Bad request", "Invalid nominal total price")
+		c.JSON(400, responseErr)
+		return
+	}
+
+	var updatedTransaction entity.Transaction
+	updatedTransaction, err = h.service.UpdateStatusPaidTranscation(transactionID)
+	if err != nil {
+		responseErr := helper.APIFailure(500, "internal server error", err.Error())
+		c.JSON(500, responseErr)
+		return
+	}
+
+	err = h.publishUpdatedTransaction(updatedTransaction)
+	if err != nil {
+		responseErr := helper.APIFailure(500, "internal server error", err.Error())
+		c.JSON(500, responseErr)
+		return
+	}
+
+	response := helper.APIResponse(200, "success payment transaction", nil)
+	c.JSON(200, response)
+}
+
+func (h *transactionHandler) publishUpdatedTransaction(updatedTransaction entity.Transaction) error {
+	conn, err := config.RabbitMQConnection()
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	ch, err := conn.Channel()
+	if err != nil {
+		return err
+	}
+	defer ch.Close()
+
+	ctx := context.Background()
+	updatedTransactionJSON, _ := json.Marshal(updatedTransaction)
+	err = ch.PublishWithContext(ctx, "transaction", "update-transaction", false, false, amqp.Publishing{
+		ContentType: "application/json",
+		Body:        []byte(updatedTransactionJSON),
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// ONLY ADMIN CAN ACCESS THIS HANDLER
 func (h *transactionHandler) GetAllUserTransactionHandler(c *gin.Context) {
 	transaction, err := h.service.GetAllUserTransaction()
 	if err != nil {

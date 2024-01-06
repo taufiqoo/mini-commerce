@@ -16,9 +16,9 @@ var (
 
 func ProductRoute(r *gin.Engine) {
 	r.GET("/products", productHandler.GetAllProductHandler)
-	r.GET("/products/:productId", productHandler.GetProductByIdHandler)
+	r.GET("/product/:productId", productHandler.GetProductByIdHandler)
 
-	r.POST("/products", middleware.Authentication(authService), middleware.Authorization("admin"), productHandler.CreateProductHandler)
-	r.PUT("/products/:productId", middleware.Authentication(authService), middleware.Authorization("admin"), productHandler.UpdateProductHandler)
-	r.DELETE("/products/:productId", middleware.Authentication(authService), middleware.Authorization("admin"), productHandler.DeleteProductHandler)
+	r.POST("/product", middleware.Authentication(authService), middleware.Authorization("admin"), productHandler.CreateProductHandler)
+	r.PUT("/product/:productId", middleware.Authentication(authService), middleware.Authorization("admin"), productHandler.UpdateProductHandler)
+	r.DELETE("/product/:productId", middleware.Authentication(authService), middleware.Authorization("admin"), productHandler.DeleteProductHandler)
 }

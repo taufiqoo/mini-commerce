@@ -19,8 +19,8 @@ var (
 
 func UserRoute(r *gin.Engine) {
 	r.GET("/users", middleware.Authentication(authService), userHandler.GetUserByIdHandler)
-	r.POST("/users/register", userHandler.CreateUserHandler)
-	r.POST("/users/login", userHandler.LoginUserHandler)
-	r.POST("users/refresh-token", userHandler.RefreshTokenHandler)
-	r.POST("/users/logout", middleware.Authentication(authService), userHandler.LogoutHandler)
+	r.POST("/auth/register", userHandler.CreateUserHandler)
+	r.POST("/auth/login", userHandler.LoginUserHandler)
+	r.POST("auth/refresh-token", userHandler.RefreshTokenHandler)
+	r.POST("/auth/logout", middleware.Authentication(authService), userHandler.LogoutHandler)
 }

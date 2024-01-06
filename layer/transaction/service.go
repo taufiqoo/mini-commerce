@@ -13,6 +13,7 @@ type Service interface {
 	GetAllUserTransaction() ([]entity.Transaction, error)
 	GetTransactionDetail(transactionId int) (entity.Transaction, error)
 	DeleteTransaction(transactionId int) (interface{}, error)
+	UpdateStatusPaidTranscation(transactionId int) (entity.Transaction, error)
 }
 
 type service struct {
@@ -26,7 +27,7 @@ func NewService(repository Repository) *service {
 func (s *service) SaveNewTransaction(userId int, input entity.TransactionInput) (entity.Transaction, error) {
 	cart, err := s.repository.FindCartById(input.CartID)
 	if err != nil {
-		return entity.Transaction{}, err
+		return entity.Transaction{}, errors.New("cart not found")
 	}
 
 	transaction := entity.Transaction{
@@ -88,4 +89,35 @@ func (s *service) DeleteTransaction(transactionId int) (interface{}, error) {
 		return nil, err
 	}
 	return deleteTransaction, nil
+}
+
+func (s *service) UpdateStatusPaidTranscation(transcactionId int) (entity.Transaction, error) {
+	transaction, err := s.repository.FindTransactionById(transcactionId)
+	if err != nil {
+		return transaction, err
+	}
+
+	transaction.Status = "paid"
+	_, err = s.repository.UpdateStatusTransaction(transaction)
+	if err != nil {
+		return transaction, err
+	}
+
+	product, err := s.repository.FindProductById(transaction.ProductID)
+	if err != nil {
+		return transaction, err
+	}
+
+	product.Stock -= transaction.Quantity
+	_, err = s.repository.UpdateProductQuantity(product)
+	if err != nil {
+		return transaction, err
+	}
+
+	err = s.repository.DeleteCart(transaction.CartID)
+	if err != nil {
+		return transaction, err
+	}
+
+	return transaction, nil
 }

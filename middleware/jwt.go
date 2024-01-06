@@ -26,7 +26,7 @@ func NewService() *jwtService {
 }
 
 func (s *jwtService) GenerateToken(userID int, role string) (string, error) {
-	expirationTime := time.Now().Add(1 * time.Hour).Unix()
+	expirationTime := time.Now().Add(3 * time.Hour).Unix()
 
 	claims := jwt.MapClaims{
 		"user_id": userID,

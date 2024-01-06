@@ -16,7 +16,7 @@ var (
 
 func CartRoute(r *gin.Engine) {
 	r.GET("/carts", middleware.Authentication(authService), middleware.Authorization("user"), cartHandler.GetMyCartHandler)
-	r.POST("/carts/:productId", middleware.Authentication(authService), middleware.Authorization("user"), cartHandler.CreateCartHandler)
-	r.PUT("/carts/:cartId/product/:productId", middleware.Authentication(authService), middleware.Authorization("user"), cartHandler.UpdateCartHandler)
-	r.DELETE("/carts/:cartId", middleware.Authentication(authService), middleware.Authorization("user"), cartHandler.DeleteCartHandler)
+	r.POST("/cart/:productId", middleware.Authentication(authService), middleware.Authorization("user"), cartHandler.CreateCartHandler)
+	r.PUT("/cart/:cartId/product/:productId", middleware.Authentication(authService), middleware.Authorization("user"), cartHandler.UpdateCartHandler)
+	r.DELETE("/cart/:cartId", middleware.Authentication(authService), middleware.Authorization("user"), cartHandler.DeleteCartHandler)
 }

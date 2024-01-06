@@ -22,3 +22,7 @@ type TransactionInput struct {
 	CartID        int    `json:"cart_id" binding:"required"`
 	PaymentMethod string `json:"payment_method" binding:"required"`
 }
+
+type PaymentInput struct {
+	Nominal float64 `json:"nominal" binding:"required"`
+}

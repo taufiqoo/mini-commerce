@@ -76,8 +76,8 @@ func (h *cartHandler) UpdateCartHandler(c *gin.Context) {
 
 	updatedCart, err := h.service.UpdateCart(cartInput, c)
 	if err != nil {
-		responseErr := helper.APIFailure(500, "internal server error", err.Error())
-		c.JSON(500, responseErr)
+		responseErr := helper.APIFailure(404, "product or cart not found", err.Error())
+		c.JSON(404, responseErr)
 		return
 	}
 

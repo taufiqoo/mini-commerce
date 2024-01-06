@@ -60,7 +60,7 @@ func (h *prodcutHandler) CreateProductHandler(c *gin.Context) {
 		c.JSON(500, responseErr)
 		return
 	}
-	response := helper.APIFailure(201, "success create product", newProduct)
+	response := helper.APIResponse(201, "success create product", newProduct)
 	c.JSON(201, response)
 }
 
@@ -79,8 +79,8 @@ func (h *prodcutHandler) UpdateProductHandler(c *gin.Context) {
 	product, err := h.service.UpdateProduct(productId, updateProductInput)
 
 	if err != nil {
-		responseErr := helper.APIFailure(500, "internal server error", err.Error())
-		c.JSON(500, responseErr)
+		responseErr := helper.APIFailure(404, "not found", err.Error())
+		c.JSON(404, responseErr)
 		return
 	}
 

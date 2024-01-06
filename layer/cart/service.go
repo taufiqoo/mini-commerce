@@ -2,6 +2,7 @@ package cart
 
 import (
 	"errors"
+	"fmt"
 	"mini-commerce/entity"
 	"strconv"
 
@@ -98,11 +99,21 @@ func (s *service) UpdateCart(inputUpdate entity.CartInput, c *gin.Context) (enti
 }
 
 func (s *service) DeleteCart(cartId int) (interface{}, error) {
-	cart, err := s.repository.DeleteCart(cartId)
+	cart, err := s.repository.FindCartById(cartId)
 	if err != nil {
 		return nil, err
 	}
-	return cart, nil
+
+	if cart.ID == 0 {
+		newError := fmt.Sprintf("cart with id %d not found", cartId)
+		return nil, errors.New(newError)
+	}
+
+	deletedCart, err := s.repository.DeleteCart(cartId)
+	if err != nil {
+		return nil, err
+	}
+	return deletedCart, nil
 }
 
 func (s *service) FindProductById(id int) (entity.Product, error) {
